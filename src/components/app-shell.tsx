@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { FileText, Gauge, Menu, Package, ReceiptText, Settings, Users, X, LogOut } from "lucide-react";
+import { FileText, Gauge, Menu, Package, ReceiptText, Settings, Users, X, LogOut, MoreHorizontal } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 import { classNames } from "@/lib/utils";
 
@@ -14,6 +14,13 @@ const links = [
   ["/customers", "Customers", Users],
   ["/items", "Items / Services", Package],
   ["/settings", "Settings", Settings]
+] as const;
+
+const mobileLinks = [
+  ["/dashboard", "Home", Gauge],
+  ["/quotations", "Quotes", FileText],
+  ["/invoices", "Invoices", ReceiptText],
+  ["/customers", "Customers", Users]
 ] as const;
 
 export function AppShell({ businessName, children }: { businessName: string; children: ReactNode }) {
@@ -42,15 +49,24 @@ export function AppShell({ businessName, children }: { businessName: string; chi
       </form>
     </>
   );
+
   return (
     <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-[var(--navy)] lg:flex no-print">{nav}</aside>
       {open && <div className="fixed inset-0 z-50 lg:hidden no-print"><button type="button" className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} aria-label="Close navigation"/><aside className="relative flex h-full w-72 flex-col bg-[var(--navy)] shadow-2xl">{nav}</aside></div>}
-      <header className="sticky top-0 z-30 flex h-16 items-center border-b border-[var(--rule)] bg-white/95 px-4 backdrop-blur lg:ml-64 lg:hidden no-print">
-        <button type="button" className="rounded-lg border border-[var(--rule)] p-2" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={20}/></button>
-        <span className="ml-3 font-black">JasimFlow</span>
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--rule)] bg-white/95 px-4 backdrop-blur lg:hidden no-print">
+        <Link href="/dashboard" className="font-black tracking-tight text-[var(--navy)]">Jasim<span className="text-[var(--accent)]">Flow</span></Link>
+        <button type="button" className="rounded-lg border border-[var(--rule)] p-2" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={19}/></button>
       </header>
-      <main className="lg:ml-64"><div className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">{children}</div></main>
+      <main className="pb-20 lg:ml-64 lg:pb-0"><div className="mx-auto max-w-[1500px] p-3 sm:p-6 lg:p-8">{children}</div></main>
+
+      <nav className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-slate-200 bg-white/95 px-1 pb-[max(.3rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-8px_25px_rgba(15,23,42,.08)] backdrop-blur lg:hidden no-print" aria-label="Mobile navigation">
+        {mobileLinks.map(([href,label,Icon]) => {
+          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+          return <Link key={href} href={href} className={classNames("mobile-nav-item", active && "mobile-nav-item-active")}><Icon size={19}/><span>{label}</span></Link>;
+        })}
+        <button type="button" onClick={() => setOpen(true)} className="mobile-nav-item"><MoreHorizontal size={20}/><span>More</span></button>
+      </nav>
     </div>
   );
 }

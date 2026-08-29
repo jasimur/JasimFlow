@@ -938,3 +938,141 @@ button:disabled { cursor: not-allowed; }
 }
 /* === JASIMFLOW V4.6 THEME + LOGO PATCH END === */
 /* JASIMFLOW V4.6 THEME + LOGO PATCH END */
+
+/* JasimFlow mobile UX + print-faithful A4 preview patch. */
+.mobile-nav-item {
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.18rem;
+  border-radius:.65rem;
+  padding:.38rem .1rem;
+  color:#64748b;
+  font-size:.62rem;
+  font-weight:750;
+  line-height:1;
+}
+.mobile-nav-item-active { color:var(--navy); background:#f1f5f9; }
+
+.document-preview-stage { width:100%; overflow:hidden; }
+.a4-preview-host { position:relative; width:100%; overflow:hidden; }
+.a4-preview-scaled { position:absolute; left:0; top:0; width:210mm; transform-origin:top left; }
+.a4-preview-page {
+  width:210mm;
+  min-height:297mm;
+  padding:10mm;
+  background:#fff;
+  box-shadow:0 18px 55px rgb(16 36 62 / .12);
+}
+.document-output-sheet {
+  width:190mm !important;
+  max-width:190mm !important;
+  min-width:190mm !important;
+  min-height:277mm !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+.document-output-sheet .doc-body {
+  flex:1 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  width:100% !important;
+  min-height:277mm !important;
+  padding:0 !important;
+}
+.document-output-sheet .doc-table-wrap { width:100% !important; max-width:100% !important; overflow:visible !important; }
+.document-output-sheet .doc-table { width:100% !important; min-width:0 !important; table-layout:fixed !important; font-size:8.5pt !important; }
+.document-output-sheet .doc-table th,
+.document-output-sheet .doc-table td { padding:2.4mm 1.6mm !important; }
+.document-output-sheet .doc-table .money { white-space:nowrap !important; font-size:8pt !important; }
+.document-output-sheet .doc-authorization-row {
+  margin-top:6mm !important;
+  padding-top:4mm !important;
+  grid-template-columns:minmax(0,1fr) 55mm !important;
+  gap:8mm !important;
+}
+.document-output-sheet .doc-signature-panel { min-height:22mm !important; max-width:55mm !important; width:100% !important; justify-self:end !important; }
+.document-output-sheet .doc-signature-image-wrap { height:13mm !important; margin-bottom:1mm !important; }
+.document-output-sheet .doc-signature-image { max-width:42mm !important; max-height:12mm !important; }
+.document-output-sheet .doc-signature-label { font-size:7.5pt !important; }
+.document-output-sheet .doc-bottom-footer { margin-top:auto !important; padding-top:4mm !important; }
+.document-output-sheet .doc-thanks-message { padding-top:3mm !important; font-size:8pt !important; }
+.document-output-sheet .doc-brand-credit { font-size:6.5pt !important; }
+.document-output-sheet .doc-logo {
+  height:18mm !important;
+  max-height:18mm !important;
+  max-width:48mm !important;
+}
+.document-output-sheet .doc-logo img {
+  max-height:18mm !important;
+  max-width:48mm !important;
+}
+
+/* Restore each theme's desktop/print structure even when the phone viewport is narrow. */
+.document-output-sheet.document-template-classic .doc-header { grid-template-columns:minmax(0,1fr) 215px !important; }
+.document-output-sheet.document-template-classic .doc-title-block { text-align:right !important; grid-column:auto !important; grid-row:auto !important; }
+.document-output-sheet.document-template-classic .doc-info-grid { grid-template-columns:minmax(0,1fr) 285px !important; }
+.document-output-sheet.document-template-classic .doc-meta-card { border-left:1px solid #d7dee8 !important; border-top:0 !important; }
+
+.document-output-sheet.document-template-executive .doc-header {
+  grid-template-columns:minmax(0,1fr) 250px !important;
+  margin:0 0 7mm !important;
+  padding:6mm !important;
+}
+.document-output-sheet.document-template-executive .doc-company { grid-column:1 !important; grid-row:1 !important; justify-content:flex-start !important; text-align:left !important; }
+.document-output-sheet.document-template-executive .doc-title-block { grid-column:2 !important; grid-row:1 !important; text-align:right !important; }
+.document-output-sheet.document-template-executive .doc-info-grid { grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr) !important; }
+
+.document-output-sheet.document-template-tech .doc-header {
+  grid-template-columns:minmax(0,1fr) auto !important;
+  margin:0 0 7mm !important;
+  padding:7mm !important;
+}
+.document-output-sheet.document-template-tech .doc-title-block { text-align:right !important; display:block !important; }
+
+.document-output-sheet.document-template-minimal .doc-header { grid-template-columns:1fr !important; }
+.document-output-sheet.document-template-minimal .doc-title-block { display:flex !important; text-align:left !important; }
+.document-output-sheet.document-template-minimal .doc-info-grid { grid-template-columns:1fr 1fr !important; }
+
+.document-output-sheet.document-template-graphite .doc-header {
+  grid-template-columns:minmax(235px,.72fr) minmax(0,1.28fr) !important;
+  margin:0 0 7mm !important;
+  padding:0 !important;
+}
+.document-output-sheet.document-template-graphite .doc-company { min-height:190px !important; grid-column:auto !important; grid-row:auto !important; justify-content:flex-start !important; text-align:left !important; }
+.document-output-sheet.document-template-graphite .doc-title-block { min-height:190px !important; grid-column:auto !important; grid-row:auto !important; text-align:right !important; display:flex !important; }
+.document-output-sheet.document-template-graphite .doc-info-grid { grid-template-columns:minmax(0,1fr) minmax(250px,.75fr) !important; }
+
+.document-output-sheet.document-template-emerald .doc-header { grid-template-columns:minmax(0,1fr) 240px !important; }
+.document-output-sheet.document-template-emerald .doc-company { grid-column:auto !important; grid-row:auto !important; justify-content:flex-start !important; text-align:left !important; }
+.document-output-sheet.document-template-emerald .doc-title-block { grid-column:auto !important; grid-row:auto !important; text-align:right !important; }
+.document-output-sheet.document-template-emerald .doc-info-grid { grid-template-columns:minmax(250px,.8fr) minmax(0,1.2fr) !important; }
+
+.document-output-sheet.document-template-copper { border:1.2mm double #b99272 !important; }
+.document-output-sheet.document-template-copper .doc-header { grid-template-columns:1fr !important; }
+.document-output-sheet.document-template-copper .doc-company { grid-column:auto !important; grid-row:auto !important; justify-content:center !important; text-align:center !important; }
+.document-output-sheet.document-template-copper .doc-title-block { grid-column:auto !important; grid-row:auto !important; text-align:center !important; }
+.document-output-sheet.document-template-copper .doc-info-grid { grid-template-columns:1.15fr .85fr !important; }
+.document-output-sheet.document-template-copper .doc-meta-card { border-left:1px solid #ddc9b7 !important; border-top:0 !important; }
+
+@media (max-width: 767px) {
+  .document-action-bar {
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:.5rem !important;
+  }
+  .document-action-bar .btn { min-width:0; padding:.55rem .35rem; font-size:.72rem; }
+  .document-action-bar .btn:nth-child(n+4) { grid-column:auto; }
+  .a4-preview-page { box-shadow:0 10px 30px rgb(16 36 62 / .14); }
+}
+
+@media print {
+  .mobile-bottom-nav { display:none !important; }
+  .document-preview-stage { overflow:visible !important; }
+  .a4-preview-host { height:auto !important; overflow:visible !important; }
+  .a4-preview-scaled { position:static !important; width:auto !important; transform:none !important; }
+  .a4-preview-page { width:auto !important; min-height:0 !important; padding:0 !important; box-shadow:none !important; }
+}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signupAction } from "@/actions/auth";
+import { PasswordInput } from "@/components/password-input";
 
 export default async function SignupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const params = await searchParams;
@@ -10,7 +11,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
       <form action={signupAction} className="grid gap-4">
         <label className="text-sm font-semibold">Business name<input className="field mt-1" name="business_name" required maxLength={180}/></label>
         <label className="text-sm font-semibold">Email<input className="field mt-1" name="email" type="email" required autoComplete="email"/></label>
-        <label className="text-sm font-semibold">Password<input className="field mt-1" name="password" type="password" required minLength={6} autoComplete="new-password"/></label>
+        <label className="text-sm font-semibold">Password<PasswordInput name="password" required minLength={6} autoComplete="new-password"/></label>
         <button type="submit" className="btn btn-primary mt-1 w-full">Create account</button>
       </form>
       <p className="mt-6 text-center text-sm text-[var(--muted)]">Already have an account? <Link className="font-bold text-[var(--navy)] underline" href="/login">Sign in</Link></p>
