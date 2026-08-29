@@ -2,7 +2,6 @@
 import type { DocumentRecord, TemplateStyle } from "@/lib/types";
 import { formatMoney } from "@/lib/money";
 import { humanizeStatus } from "@/lib/utils";
-import { DocumentPreviewFrame } from "@/components/document-preview-frame";
 
 const allowedTemplates = new Set<TemplateStyle>(["classic", "executive", "tech", "minimal", "graphite", "emerald", "copper"]);
 
@@ -14,7 +13,7 @@ export function DocumentPreview({ document, showDocumentCredit = true, documentC
   const isPaid = isInvoice && document.status === "paid";
   const template: TemplateStyle = allowedTemplates.has(document.template_style) ? document.template_style : "classic";
 
-  return <DocumentPreviewFrame><article id="jasimflow-document" className={`print-sheet document-paper document-output-sheet document-template document-template-${template} mx-auto overflow-hidden border bg-white`}>
+  return <article className={`print-sheet document-paper document-template document-template-${template} mx-auto overflow-hidden border bg-white shadow-[0_18px_55px_rgba(16,36,62,.10)]`}>
     <div className="doc-accent-bar" />
     <div className="doc-body">
       <header className="doc-header">
@@ -53,8 +52,7 @@ export function DocumentPreview({ document, showDocumentCredit = true, documentC
         </div>
 
         <div className="doc-meta-card grid content-start gap-2 p-5 text-sm">
-          <div className="flex justify-between gap-6"><span className="doc-muted">Issue date</span><strong>{document.issue_date}</strong></div>
-          <div className="flex justify-between gap-6"><span className="doc-muted">{isInvoice ? "Due date" : "Valid until"}</span><strong>{isInvoice ? document.due_date : document.valid_until}</strong></div>
+          <div className="flex justify-between gap-6"><span className="doc-muted">Date</span><strong>{document.issue_date}</strong></div>
           <div className="flex justify-between gap-6"><span className="doc-muted">Currency</span><strong>{document.currency}</strong></div>
           {!isInvoice && document.project_reference && <div className="mt-2 border-t border-current/10 pt-3">
             <span className="doc-muted block text-xs">Project / Reference</span>
@@ -116,5 +114,5 @@ export function DocumentPreview({ document, showDocumentCredit = true, documentC
         {showDocumentCredit && <div className="doc-brand-credit">{documentCreditText.trim() || "Powered by JasimFlow · by Jasim"}</div>}
       </footer>
     </div>
-  </article></DocumentPreviewFrame>;
+  </article>;
 }

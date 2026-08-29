@@ -9,7 +9,7 @@ import { useToast } from "@/components/toast";
 import { Button, Card, Input, Label, Select, Textarea } from "@/components/ui";
 import { calculateTotals, centsToFixed, lineTotalCents } from "@/lib/money";
 import type { Business, CatalogItem, Customer, DiscountType, DocumentRecord, DocumentStatus, DocumentType, EditorLineItem, TemplateStyle } from "@/lib/types";
-import { addDaysISO, todayISO } from "@/lib/utils";
+import { todayISO } from "@/lib/utils";
 
 type LocalLine = EditorLineItem & { key: string };
 
@@ -67,8 +67,6 @@ export function DocumentEditor({
   const [documentNumber, setDocumentNumber] = useState(initialNumber);
   const [customerId, setCustomerId] = useState(document?.customer_id ?? customers[0]?.id ?? "");
   const [issueDate, setIssueDate] = useState(document?.issue_date ?? todayISO());
-  const [validUntil, setValidUntil] = useState(document?.valid_until ?? addDaysISO(30));
-  const [dueDate, setDueDate] = useState(document?.due_date ?? addDaysISO(14));
   const [projectReference, setProjectReference] = useState(document?.project_reference ?? "");
   const [status, setStatus] = useState<DocumentStatus>(document?.status ?? (type === "quotation" ? "draft" : "unpaid"));
   const [templateStyle, setTemplateStyle] = useState<TemplateStyle>(document?.template_style ?? "classic");
@@ -168,8 +166,10 @@ export function DocumentEditor({
       document_number: customDocumentNumber,
       customer_id: customerId,
       issue_date: issueDate,
-      valid_until: type === "quotation" ? validUntil : "",
-      due_date: type === "invoice" ? dueDate : "",
+      // Keep legacy database compatibility while the UI uses one date only.
+      // These hidden fields mirror the visible Date so existing DB constraints/RPCs remain valid.
+      valid_until: type === "quotation" ? issueDate : "",
+      due_date: type === "invoice" ? issueDate : "",
       project_reference: type === "quotation" ? projectReference.trim() : "",
       status,
       template_style: templateStyle,
@@ -234,8 +234,8 @@ export function DocumentEditor({
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="md:col-span-2">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(180px,1fr)]">
+            <div>
               <div className="mb-1 flex items-center justify-between gap-3">
                 <Label>Customer</Label>
                 <button type="button" className="inline-flex items-center gap-1 text-xs font-bold text-[var(--navy)] hover:underline" onClick={() => setCustomerModalOpen(true)}>
@@ -247,8 +247,7 @@ export function DocumentEditor({
                 {localCustomers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </Select>
             </div>
-            <div><Label>Issue date</Label><Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} /></div>
-            <div><Label>{type === "quotation" ? "Valid until" : "Due date"}</Label><Input type="date" value={type === "quotation" ? validUntil : dueDate} onChange={(e) => type === "quotation" ? setValidUntil(e.target.value) : setDueDate(e.target.value)} /></div>
+            <div><Label>Date</Label><Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} /></div>
           </div>
           {type === "quotation" && <div className="mt-4 max-w-2xl">
             <Label>Project / Reference <span className="font-normal text-[var(--muted)]">(optional)</span></Label>

@@ -1,20 +1,15 @@
-JasimFlow v4.10 — PDF Export Stability Patch
+JasimFlow v4.11 — Problem 1: One Date Only
 
-Fixes:
-1. Tech Grid: fixes "unsupported color function color" during Download PDF.
-2. Replaces old html2pdf/html2canvas engine with html2canvas-pro 1.6.7 + jsPDF 4.2.1 (loaded at runtime, no npm package install required).
-3. PDF is rendered from a hidden full-size A4 clone, not from the mobile scaled preview.
-4. Fixes missing/clipped text seen in several templates.
-5. Locks Minimal Ledger export geometry to prevent text/layout drift.
-6. Ensures PDF export temporary DOM is always removed after success/failure.
-7. Adds generation timeouts so Download/Share buttons cannot stay permanently locked after a rendering failure.
-8. Share uses the same corrected PDF generator.
+Changes:
+- Invoice and Quotation editor now show only one field: Date.
+- Date defaults to the current date for new documents.
+- Due Date and Valid Until are removed from the visible editor.
+- Preview/PDF document metadata shows only Date.
+- Automatic overdue calculation based on hidden due_date is disabled.
+- Existing database/RPC compatibility is preserved by mirroring Date into legacy
+  due_date/valid_until fields internally; no Supabase SQL migration is required.
 
-No Supabase SQL is required.
-No npm install is required.
-
-After extracting over the JasimFlow project root:
-  npm run build
-  git add .
-  git commit -m "Fix PDF export and template rendering"
-  git push
+This patch intentionally does NOT change:
+- template overflow/layout
+- footer/thank-you behavior
+Those are Problem 2 and Problem 3 and should be tested/fixed separately.
