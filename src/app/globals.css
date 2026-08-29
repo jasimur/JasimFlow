@@ -1076,3 +1076,108 @@ button:disabled { cursor: not-allowed; }
   .a4-preview-scaled { position:static !important; width:auto !important; transform:none !important; }
   .a4-preview-page { width:auto !important; min-height:0 !important; padding:0 !important; box-shadow:none !important; }
 }
+
+/* === JASIMFLOW V4.10 PDF EXPORT STABILITY PATCH ===
+   PDF capture is rendered from an off-screen, full-size A4 clone instead of
+   the mobile-scaled preview. This prevents transform-induced text drift and
+   clipping while keeping every template at its real print geometry. */
+.jasimflow-pdf-export-root {
+  position:fixed !important;
+  left:-100000px !important;
+  top:0 !important;
+  z-index:-2147483647 !important;
+  width:190mm !important;
+  min-width:190mm !important;
+  max-width:190mm !important;
+  overflow:visible !important;
+  background:#fff !important;
+  pointer-events:none !important;
+}
+
+.jasimflow-pdf-export-sheet {
+  width:190mm !important;
+  min-width:190mm !important;
+  max-width:190mm !important;
+  min-height:277mm !important;
+  height:auto !important;
+  margin:0 !important;
+  overflow:visible !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  transform:none !important;
+  zoom:1 !important;
+  background:#fff !important;
+}
+
+.jasimflow-pdf-export-sheet,
+.jasimflow-pdf-export-sheet * {
+  animation:none !important;
+  transition:none !important;
+  caret-color:transparent !important;
+}
+
+.jasimflow-pdf-export-sheet .doc-body {
+  width:100% !important;
+  min-height:277mm !important;
+  overflow:visible !important;
+}
+
+.jasimflow-pdf-export-sheet .doc-header,
+.jasimflow-pdf-export-sheet .doc-info-grid,
+.jasimflow-pdf-export-sheet .doc-table-wrap,
+.jasimflow-pdf-export-sheet .doc-totals,
+.jasimflow-pdf-export-sheet .doc-footer-grid,
+.jasimflow-pdf-export-sheet .doc-authorization-row,
+.jasimflow-pdf-export-sheet .doc-bottom-footer {
+  transform:none !important;
+}
+
+.jasimflow-pdf-export-sheet .doc-table-wrap,
+.jasimflow-pdf-export-sheet .doc-table,
+.jasimflow-pdf-export-sheet .doc-table thead,
+.jasimflow-pdf-export-sheet .doc-table tbody,
+.jasimflow-pdf-export-sheet .doc-table tr,
+.jasimflow-pdf-export-sheet .doc-table th,
+.jasimflow-pdf-export-sheet .doc-table td {
+  overflow:visible !important;
+}
+
+.jasimflow-pdf-export-sheet .doc-table th,
+.jasimflow-pdf-export-sheet .doc-table td,
+.jasimflow-pdf-export-sheet .doc-company-details,
+.jasimflow-pdf-export-sheet .doc-muted,
+.jasimflow-pdf-export-sheet .doc-description,
+.jasimflow-pdf-export-sheet .doc-terms-panel,
+.jasimflow-pdf-export-sheet .doc-soft-card,
+.jasimflow-pdf-export-sheet .doc-payment-card {
+  text-rendering:geometricPrecision;
+}
+
+/* Minimal Ledger: lock the exact desktop/print flex geometry during capture. */
+.jasimflow-pdf-export-sheet.document-template-minimal .doc-header {
+  grid-template-columns:1fr !important;
+}
+.jasimflow-pdf-export-sheet.document-template-minimal .doc-title-block {
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:flex-end !important;
+  justify-content:space-between !important;
+  gap:1rem !important;
+  text-align:left !important;
+}
+.jasimflow-pdf-export-sheet.document-template-minimal .doc-info-grid {
+  grid-template-columns:1fr 1fr !important;
+}
+
+/* Tech Grid: preserve the full-width technical header without relying on the
+   scaled mobile ancestor during capture. */
+.jasimflow-pdf-export-sheet.document-template-tech .doc-header {
+  grid-template-columns:minmax(0,1fr) auto !important;
+  margin:0 0 7mm !important;
+  padding:7mm !important;
+}
+.jasimflow-pdf-export-sheet.document-template-tech .doc-title-block {
+  display:block !important;
+  text-align:right !important;
+}
+/* === JASIMFLOW V4.10 PDF EXPORT STABILITY PATCH END === */

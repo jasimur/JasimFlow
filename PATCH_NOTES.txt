@@ -1,24 +1,20 @@
-JasimFlow v4.9 — Mobile + PDF + Auth Patch
+JasimFlow v4.10 — PDF Export Stability Patch
 
-Included:
-1. Mobile quotation/invoice preview keeps the real A4/print layout and scales it to the phone screen.
-2. New Download PDF button.
-3. New Share button. On supported phones it shares the generated PDF; otherwise it falls back safely.
-4. Print remains available separately.
-5. Direct PDF export avoids browser-added URL/header/footer text that can appear during mobile printing.
-6. Login session cookie explicitly persists for 1 year unless the user signs out or the browser/site data is cleared.
-7. Logged-in users who revisit /login are redirected to Dashboard.
-8. Show/Hide password button on Login and Signup.
-9. Mobile bottom navigation: Home, Quotes, Invoices, Customers, More.
-10. Quotations/Invoices, Customers and Items use phone-friendly cards instead of wide horizontal tables.
+Fixes:
+1. Tech Grid: fixes "unsupported color function color" during Download PDF.
+2. Replaces old html2pdf/html2canvas engine with html2canvas-pro 1.6.7 + jsPDF 4.2.1 (loaded at runtime, no npm package install required).
+3. PDF is rendered from a hidden full-size A4 clone, not from the mobile scaled preview.
+4. Fixes missing/clipped text seen in several templates.
+5. Locks Minimal Ledger export geometry to prevent text/layout drift.
+6. Ensures PDF export temporary DOM is always removed after success/failure.
+7. Adds generation timeouts so Download/Share buttons cannot stay permanently locked after a rendering failure.
+8. Share uses the same corrected PDF generator.
 
-Database/Supabase migration: NONE.
-New npm package: NONE.
+No Supabase SQL is required.
+No npm install is required.
 
-PDF note:
-The Download/Share PDF engine is loaded on demand from the pinned html2pdf.js 0.10.1 CDN when the user clicks Download PDF or Share. The normal app does not load it until needed.
-
-Validation performed:
-- TypeScript: PASS (tsc --noEmit)
-- Source ESLint: PASS (src + proxy.ts)
-- Full Next build could not be run in the Linux sandbox because this ZIP contains Windows Next.js binaries and external package downloads are unavailable here. Run npm run build on your Windows project before pushing.
+After extracting over the JasimFlow project root:
+  npm run build
+  git add .
+  git commit -m "Fix PDF export and template rendering"
+  git push

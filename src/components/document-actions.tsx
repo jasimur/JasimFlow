@@ -8,62 +8,208 @@ import { useToast } from "@/components/toast";
 import { Button, ConfirmDialog } from "@/components/ui";
 import type { DocumentRecord } from "@/lib/types";
 
-type Html2PdfWorker = {
-  set(options: unknown): Html2PdfWorker;
-  from(element: HTMLElement): Html2PdfWorker;
-  outputPdf(type: "blob"): Promise<Blob>;
+type Html2CanvasOptions = {
+  scale?: number;
+  useCORS?: boolean;
+  allowTaint?: boolean;
+  backgroundColor?: string | null;
+  logging?: boolean;
+  scrollX?: number;
+  scrollY?: number;
+  windowWidth?: number;
+  windowHeight?: number;
 };
-type Html2PdfFactory = () => Html2PdfWorker;
+
+type Html2CanvasFactory = (element: HTMLElement, options?: Html2CanvasOptions) => Promise<HTMLCanvasElement>;
+
+type JsPdfInstance = {
+  addPage(): void;
+  addImage(imageData: string, format: "PNG" | "JPEG", x: number, y: number, width: number, height: number, alias?: string, compression?: string): void;
+  output(type: "blob"): Blob;
+};
+
+type JsPdfConstructor = new (options?: {
+  orientation?: "portrait" | "landscape";
+  unit?: "mm";
+  format?: "a4";
+  compress?: boolean;
+}) => JsPdfInstance;
 
 declare global {
   interface Window {
-    html2pdf?: Html2PdfFactory;
+    html2canvas?: Html2CanvasFactory | { default?: Html2CanvasFactory };
+    jspdf?: { jsPDF?: JsPdfConstructor };
   }
 }
 
-let pdfEnginePromise: Promise<Html2PdfFactory> | null = null;
+const PDF_ENGINE_TIMEOUT_MS = 45_000;
+const IMAGE_WAIT_TIMEOUT_MS = 8_000;
+const PDF_MARGIN_MM = 10;
+const PDF_CONTENT_WIDTH_MM = 190;
+const PDF_CONTENT_HEIGHT_MM = 277;
 
-function loadPdfEngine(): Promise<Html2PdfFactory> {
-  if (window.html2pdf) return Promise.resolve(window.html2pdf);
-  if (pdfEnginePromise) return pdfEnginePromise;
+const scriptPromises = new Map<string, Promise<void>>();
 
-  pdfEnginePromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>('script[data-jasimflow-pdf="true"]');
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+function loadScript(src: string, key: string): Promise<void> {
+  const cached = scriptPromises.get(key);
+  if (cached) return cached;
+
+  const promise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[data-jasimflow-lib="${key}"]`);
     if (existing) {
-      existing.addEventListener("load", () => window.html2pdf ? resolve(window.html2pdf) : reject(new Error("PDF engine unavailable")), { once: true });
-      existing.addEventListener("error", () => reject(new Error("PDF engine failed to load")), { once: true });
+      if (existing.dataset.loaded === "true") {
+        resolve();
+        return;
+      }
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error(`${key} failed to load`)), { once: true });
       return;
     }
 
     const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js";
+    script.src = src;
     script.async = true;
-    script.dataset.jasimflowPdf = "true";
-    script.onload = () => window.html2pdf ? resolve(window.html2pdf) : reject(new Error("PDF engine unavailable"));
-    script.onerror = () => reject(new Error("PDF engine failed to load"));
+    script.crossOrigin = "anonymous";
+    script.dataset.jasimflowLib = key;
+    script.addEventListener("load", () => {
+      script.dataset.loaded = "true";
+      resolve();
+    }, { once: true });
+    script.addEventListener("error", () => reject(new Error(`${key} failed to load`)), { once: true });
     document.head.appendChild(script);
   });
 
-  return pdfEnginePromise;
+  scriptPromises.set(key, promise);
+  return promise;
+}
+
+function getHtml2Canvas(): Html2CanvasFactory {
+  const candidate = window.html2canvas;
+  if (typeof candidate === "function") return candidate;
+  if (candidate && typeof candidate.default === "function") return candidate.default;
+  throw new Error("PDF renderer is unavailable");
+}
+
+function getJsPdf(): JsPdfConstructor {
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) throw new Error("PDF writer is unavailable");
+  return jsPDF;
+}
+
+async function loadPdfEngines() {
+  // html2canvas-pro 1.6.7 is deliberately pinned. It understands Tailwind 4's
+  // modern CSS colour functions while retaining reliable CSS backgrounds/gradients.
+  await Promise.all([
+    loadScript("https://cdn.jsdelivr.net/npm/html2canvas-pro@1.6.7/dist/html2canvas-pro.min.js", "html2canvas-pro"),
+    loadScript("https://cdn.jsdelivr.net/npm/jspdf@4.2.1/dist/jspdf.umd.min.js", "jspdf"),
+  ]);
+  return { html2canvas: getHtml2Canvas(), jsPDF: getJsPdf() };
 }
 
 function safeFileName(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "document";
 }
 
-async function createPdfBlob(documentNumber: string) {
-  const element = document.getElementById("jasimflow-document");
-  if (!element) throw new Error("Document preview not found");
-  const html2pdf = await loadPdfEngine();
-  const worker = html2pdf().set({
-    margin: [10, 10, 10, 10],
-    filename: `${safeFileName(documentNumber)}.pdf`,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    pagebreak: { mode: ["css", "legacy"] }
-  }).from(element);
-  return worker.outputPdf("blob");
+function waitForImages(root: HTMLElement) {
+  const images = Array.from(root.querySelectorAll<HTMLImageElement>("img"));
+  const pending = images.filter((image) => !image.complete);
+  if (!pending.length) return Promise.resolve();
+
+  return Promise.all(pending.map((image) => new Promise<void>((resolve) => {
+    const finish = () => resolve();
+    image.addEventListener("load", finish, { once: true });
+    image.addEventListener("error", finish, { once: true });
+  }))).then(() => undefined);
+}
+
+function createExportClone(source: HTMLElement) {
+  const root = document.createElement("div");
+  root.className = "jasimflow-pdf-export-root";
+  root.setAttribute("aria-hidden", "true");
+
+  const clone = source.cloneNode(true) as HTMLElement;
+  clone.removeAttribute("id");
+  clone.classList.add("jasimflow-pdf-export-sheet");
+  root.appendChild(clone);
+  document.body.appendChild(root);
+  return { root, clone };
+}
+
+function canvasSliceToDataUrl(source: HTMLCanvasElement, startY: number, height: number) {
+  const pageCanvas = document.createElement("canvas");
+  pageCanvas.width = source.width;
+  pageCanvas.height = height;
+  const context = pageCanvas.getContext("2d");
+  if (!context) throw new Error("Could not prepare PDF page");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+  context.drawImage(source, 0, startY, source.width, height, 0, 0, source.width, height);
+  return pageCanvas.toDataURL("image/jpeg", 0.96);
+}
+
+async function createPdfBlob() {
+  const source = document.getElementById("jasimflow-document");
+  if (!source) throw new Error("Document preview not found");
+
+  const { html2canvas, jsPDF } = await withTimeout(loadPdfEngines(), 15_000, "PDF tools took too long to load. Check your internet connection and try again.");
+  const { root, clone } = createExportClone(source);
+
+  try {
+    if (document.fonts?.ready) await withTimeout(document.fonts.ready, 5_000, "Fonts took too long to prepare").catch(() => undefined);
+    await withTimeout(waitForImages(clone), IMAGE_WAIT_TIMEOUT_MS, "Images took too long to prepare").catch(() => undefined);
+
+    const canvas = await withTimeout(
+      html2canvas(clone, {
+        scale: Math.min(2, Math.max(1.5, window.devicePixelRatio || 1)),
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: Math.max(1200, clone.scrollWidth),
+        windowHeight: Math.max(1600, clone.scrollHeight),
+      }),
+      PDF_ENGINE_TIMEOUT_MS,
+      "PDF generation timed out. Please try again.",
+    );
+
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
+    const pixelsPerMm = canvas.width / PDF_CONTENT_WIDTH_MM;
+    const maxPageHeightPx = Math.max(1, Math.floor(PDF_CONTENT_HEIGHT_MM * pixelsPerMm));
+
+    let startY = 0;
+    let pageIndex = 0;
+    while (startY < canvas.height) {
+      const sliceHeight = Math.min(maxPageHeightPx, canvas.height - startY);
+      if (pageIndex > 0) pdf.addPage();
+      const pageImage = canvasSliceToDataUrl(canvas, startY, sliceHeight);
+      const renderedHeightMm = sliceHeight / pixelsPerMm;
+      pdf.addImage(pageImage, "JPEG", PDF_MARGIN_MM, PDF_MARGIN_MM, PDF_CONTENT_WIDTH_MM, renderedHeightMm, undefined, "FAST");
+      startY += sliceHeight;
+      pageIndex += 1;
+    }
+
+    return pdf.output("blob");
+  } finally {
+    root.remove();
+  }
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -74,7 +220,7 @@ function downloadBlob(blob: Blob, fileName: string) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  window.setTimeout(() => URL.revokeObjectURL(url), 2_000);
 }
 
 export function DocumentActions({ document }: { document: DocumentRecord }) {
@@ -92,9 +238,10 @@ export function DocumentActions({ document }: { document: DocumentRecord }) {
   function remove() { startTransition(async () => { const r = await deleteDocument(document.id); if (!r.ok) { show(r.error, "error"); return; } show("Document deleted", "success"); router.push(`/${base}`); }); }
 
   async function downloadPdf() {
+    if (exporting) return;
     setExporting("download");
     try {
-      const blob = await createPdfBlob(document.document_number);
+      const blob = await createPdfBlob();
       downloadBlob(blob, pdfName);
       show("PDF downloaded", "success");
     } catch (error) {
@@ -105,19 +252,23 @@ export function DocumentActions({ document }: { document: DocumentRecord }) {
   }
 
   async function shareDocument() {
+    if (exporting) return;
     setExporting("share");
     try {
-      const blob = await createPdfBlob(document.document_number);
+      const blob = await createPdfBlob();
       const file = new File([blob], pdfName, { type: "application/pdf" });
-      const shareData = { title: document.document_number, text: `${document.document_type === "invoice" ? "Invoice" : "Quotation"} ${document.document_number}`, files: [file] };
+      const shareText = `${document.document_type === "invoice" ? "Invoice" : "Quotation"} ${document.document_number}`;
+      const shareData: ShareData = { title: document.document_number, text: shareText, files: [file] };
+
       if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
         await navigator.share(shareData);
         return;
       }
       if (navigator.share) {
-        await navigator.share({ title: document.document_number, text: shareData.text, url: window.location.href });
+        await navigator.share({ title: document.document_number, text: shareText, url: window.location.href });
         return;
       }
+
       downloadBlob(blob, pdfName);
       show("Sharing is not supported on this browser, so the PDF was downloaded instead.", "info");
     } catch (error) {
