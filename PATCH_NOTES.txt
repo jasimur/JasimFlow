@@ -1,15 +1,7 @@
-JasimFlow v4.11 — Problem 1: One Date Only
+JasimFlow v4.11.1 — PDF Preview ID hotfix
 
-Changes:
-- Invoice and Quotation editor now show only one field: Date.
-- Date defaults to the current date for new documents.
-- Due Date and Valid Until are removed from the visible editor.
-- Preview/PDF document metadata shows only Date.
-- Automatic overdue calculation based on hidden due_date is disabled.
-- Existing database/RPC compatibility is preserved by mirroring Date into legacy
-  due_date/valid_until fields internally; no Supabase SQL migration is required.
-
-This patch intentionally does NOT change:
-- template overflow/layout
-- footer/thank-you behavior
-Those are Problem 2 and Problem 3 and should be tested/fixed separately.
+Fix:
+- Adds id="jasimflow-document" to the actual A4 DocumentPreview root.
+- Restores compatibility with v4.10 Download PDF / Share exporter.
+- Keeps v4.11 one-Date changes intact.
+- No SQL or npm install required.

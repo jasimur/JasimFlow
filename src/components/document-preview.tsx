@@ -13,7 +13,7 @@ export function DocumentPreview({ document, showDocumentCredit = true, documentC
   const isPaid = isInvoice && document.status === "paid";
   const template: TemplateStyle = allowedTemplates.has(document.template_style) ? document.template_style : "classic";
 
-  return <article className={`print-sheet document-paper document-template document-template-${template} mx-auto overflow-hidden border bg-white shadow-[0_18px_55px_rgba(16,36,62,.10)]`}>
+  return <article id="jasimflow-document" className={`print-sheet document-paper document-template document-template-${template} mx-auto overflow-hidden border bg-white shadow-[0_18px_55px_rgba(16,36,62,.10)]`}>
     <div className="doc-accent-bar" />
     <div className="doc-body">
       <header className="doc-header">
