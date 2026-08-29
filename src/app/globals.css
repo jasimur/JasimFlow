@@ -1,0 +1,940 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #10243e;
+  --ink: #172033;
+  --muted: #667085;
+  --accent: #a94836;
+  --accent-light: #e89c89;
+  --paper: #f6f3ed;
+  --rule: #ddd8cf;
+  --good: #176b4d;
+  --warn: #9a5a13;
+  --bad: #a12b2b;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+.money { font-variant-numeric: tabular-nums; }
+.field { width: 100%; border: 1px solid var(--rule); border-radius: .65rem; background: #fff; padding: .65rem .75rem; color: var(--ink); outline: none; transition: border-color .15s, box-shadow .15s; }
+.field:focus { border-color: #7991ad; box-shadow: 0 0 0 3px rgb(16 36 62 / .09); }
+.btn { display: inline-flex; min-height: 2.55rem; align-items: center; justify-content: center; gap: .45rem; border-radius: .65rem; border: 1px solid transparent; padding: .55rem .9rem; font-size: .875rem; font-weight: 700; transition: .15s; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: #183454; }
+.btn-secondary { border-color: var(--rule); background: white; color: var(--ink); }
+.btn-secondary:hover, .btn-ghost:hover { background: #f3f4f6; }
+.btn-danger { background: #9f2d2d; color: white; }
+.btn-danger:hover { background: #812323; }
+.btn-ghost { background: transparent; color: var(--ink); }
+.nav-link { display: flex; align-items: center; gap: .7rem; border-radius: .65rem; padding: .7rem .8rem; color: #cbd5e1; font-size: .875rem; font-weight: 650; }
+.nav-link:hover { background: rgb(255 255 255 / .07); color: white; }
+.nav-link-active { background: rgb(255 255 255 / .11); color: white; box-shadow: inset 3px 0 0 var(--accent-light); }
+.badge { display: inline-flex; border-radius: 999px; padding: .25rem .55rem; font-size: .72rem; font-weight: 800; line-height: 1; text-transform: capitalize; }
+.badge-neutral { background: #eef0f3; color: #4b5563; }
+.badge-good { background: #e7f5ee; color: var(--good); }
+.badge-warn { background: #fff4dc; color: var(--warn); }
+.badge-bad { background: #fdeaea; color: var(--bad); }
+.badge-blue { background: #eaf1f9; color: #255c8f; }
+.toast { display:flex; align-items:center; justify-content:space-between; gap:1rem; border-radius:.75rem; border:1px solid var(--rule); background:white; padding:.8rem 1rem; box-shadow:0 12px 30px rgb(15 23 42 / .16); font-size:.875rem; }
+.toast-success { border-left: 4px solid var(--good); }
+.toast-error { border-left: 4px solid var(--bad); }
+.toast-info { border-left: 4px solid #3b6f9f; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: .8rem; background:white; }
+.data-table { width:100%; min-width:760px; border-collapse:collapse; font-size:.875rem; }
+.data-table th { background:#faf9f6; color:#667085; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; text-align:left; padding:.75rem 1rem; border-bottom:1px solid var(--rule); }
+.data-table td { padding:.8rem 1rem; border-bottom:1px solid #eeeae3; vertical-align:middle; }
+.data-table tr:last-child td { border-bottom:0; }
+.auth-grid { background-image: linear-gradient(135deg, rgb(16 36 62 / .96), rgb(25 58 91 / .93)); }
+
+@page { size: A4 portrait; margin: 10mm; }
+.document-paper { width: min(100%, 210mm); min-height: 297mm; }
+
+@media print {
+  html, body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  main, .lg\:ml-64 { margin-left:0 !important; }
+  main > div { max-width:none !important; padding:0 !important; }
+  .print-sheet { width:100% !important; max-width:none !important; min-height:277mm !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:0 !important; overflow:visible !important; }
+  .print-table thead { display: table-header-group; }
+  .print-table tr { break-inside: avoid; page-break-inside: avoid; }
+  .totals-block, .print-keep { break-inside: avoid; page-break-inside: avoid; }
+}
+
+/* JasimFlow premium document templates. These are intentionally different layouts,
+   not simple color swaps. All variants share the same semantic document markup so
+   saved invoices remain stable while the presentation can change safely. */
+.document-template {
+  --doc-primary:#10243e;
+  --doc-accent:#a94836;
+  --doc-soft:#fbfaf7;
+  --doc-border:#ddd8cf;
+  --doc-muted:#667085;
+  --doc-head-text:#fff;
+  border-color:var(--doc-border);
+  border-radius:1rem;
+  color:#172033;
+}
+.doc-accent-bar { height:8px; background:var(--doc-primary); }
+.doc-body { padding:2.5rem; }
+.doc-header { display:grid; gap:1.75rem; grid-template-columns:minmax(0,1fr) auto; align-items:start; margin-bottom:2.25rem; border-bottom:1px solid var(--doc-border); padding-bottom:1.75rem; }
+.doc-company { min-width:0; }
+.doc-logo { border:1px solid var(--doc-border); border-radius:.8rem; box-shadow:0 3px 14px rgb(15 23 42 / .07); }
+.doc-company-name,.doc-customer-name,.doc-total-accent { color:var(--doc-primary); }
+.doc-company-details,.doc-muted { color:var(--doc-muted); }
+.doc-kicker,.doc-section-label { color:var(--doc-accent); }
+.doc-number { color:#172033; }
+.doc-status { border:1px solid var(--doc-border); background:var(--doc-soft); color:var(--doc-muted); }
+.doc-bill-card,.doc-meta-card,.doc-totals,.doc-soft-card,.doc-payment-card { border:1px solid var(--doc-border); border-radius:.8rem; }
+.doc-bill-card,.doc-soft-card { background:var(--doc-soft); }
+.doc-amount-due { border-top:1px solid var(--doc-border); }
+.doc-table-wrap { border:1px solid var(--doc-border); border-radius:.8rem; }
+.doc-table-head { background:var(--doc-primary); color:var(--doc-head-text); }
+.doc-cell { border-bottom:1px solid var(--doc-border); }
+.doc-row-alt { background:color-mix(in srgb,var(--doc-soft) 70%,white); }
+.doc-description { color:var(--doc-muted); }
+.doc-grand-total { border-top:2px solid var(--doc-primary); color:var(--doc-primary); }
+.doc-footer-grid,.doc-thanks { border-top:1px solid var(--doc-border); }
+.doc-thanks { color:var(--doc-muted); }
+
+/* 1. Jasim Classic — the original simple premium layout. */
+.document-template-classic { --doc-primary:#10243e; --doc-accent:#a94836; --doc-soft:#fbfaf7; --doc-border:#ddd8cf; --doc-muted:#667085; }
+.document-template-classic .doc-accent-bar { background:linear-gradient(90deg,#10243e 0 78%,#a94836 78% 100%); }
+.document-template-classic .doc-header { border-bottom:1px solid #d8dde4; }
+.document-template-classic .doc-table-head { background:#10243e; }
+
+/* 2. Executive Split — invoice identity left, company identity right. */
+.document-template-executive { --doc-primary:#172b4d; --doc-accent:#c34e3b; --doc-soft:#f8f7f4; --doc-border:#d9dde4; --doc-muted:#647084; }
+.document-template-executive .doc-accent-bar { height:5px; background:#c34e3b; }
+.document-template-executive .doc-header { grid-template-columns:minmax(220px,.72fr) minmax(0,1.28fr); border:0; padding:0; margin-bottom:1.5rem; }
+.document-template-executive .doc-title-block { grid-column:1; grid-row:1; text-align:left !important; background:#172b4d; color:white; padding:1.5rem; border-radius:.8rem; }
+.document-template-executive .doc-company { grid-column:2; grid-row:1; justify-content:flex-end; text-align:right; padding:.35rem 0; }
+.document-template-executive .doc-company .doc-logo { order:2; }
+.document-template-executive .doc-company-name,.document-template-executive .doc-number { color:inherit; }
+.document-template-executive .doc-kicker { color:#ffb7a9; }
+.document-template-executive .doc-status { border-color:rgb(255 255 255 / .25); color:white; background:rgb(255 255 255 / .09); }
+.document-template-executive .doc-info-grid { grid-template-columns:280px minmax(0,1fr); }
+.document-template-executive .doc-meta-card { order:-1; background:#f8f7f4; }
+.document-template-executive .doc-bill-card { background:white; }
+.document-template-executive .doc-table-head { background:#c34e3b; }
+.document-template-executive .doc-totals { border-left:5px solid #172b4d; }
+
+/* 3. Tech Grid — full-width technical letterhead and crisp data blocks. */
+.document-template-tech { --doc-primary:#083b66; --doc-accent:#0b91d0; --doc-soft:#f1f8fc; --doc-border:#c9deeb; --doc-muted:#567184; }
+.document-template-tech .doc-accent-bar { display:none; }
+.document-template-tech .doc-header { margin:-2.5rem -2.5rem 1.75rem; padding:2rem 2.5rem 1.8rem; border:0; background:linear-gradient(118deg,#082f52 0%,#0a527e 72%,#0b91d0 72%); color:white; }
+.document-template-tech .doc-company-name,.document-template-tech .doc-number,.document-template-tech .doc-company-details,.document-template-tech .doc-tax { color:white; }
+.document-template-tech .doc-kicker { color:#9de4ff; }
+.document-template-tech .doc-logo { border-color:rgb(255 255 255 / .35); box-shadow:none; }
+.document-template-tech .doc-status { border-color:rgb(255 255 255 / .28); background:rgb(255 255 255 / .12); color:white; }
+.document-template-tech .doc-bill-card,.document-template-tech .doc-meta-card { border-radius:.35rem; box-shadow:inset 0 0 0 1px rgb(8 59 102 / .03); }
+.document-template-tech .doc-table-wrap { border-radius:.35rem; }
+.document-template-tech .doc-table-head { background:#0a527e; }
+.document-template-tech .doc-totals { border-radius:.35rem; background:#f1f8fc; }
+
+/* 4. Minimal Ledger — borderless letterhead, ruled accounting table. */
+.document-template-minimal { --doc-primary:#101828; --doc-accent:#101828; --doc-soft:#fff; --doc-border:#d0d5dd; --doc-muted:#667085; border-radius:0; box-shadow:none !important; }
+.document-template-minimal .doc-accent-bar { display:none; }
+.document-template-minimal .doc-body { padding-top:3rem; }
+.document-template-minimal .doc-header { grid-template-columns:1fr; gap:1rem; border-bottom:2px solid #101828; }
+.document-template-minimal .doc-title-block { display:flex; align-items:end; justify-content:space-between; gap:1rem; text-align:left !important; }
+.document-template-minimal .doc-kicker { font-size:1.35rem; letter-spacing:.08em; }
+.document-template-minimal .doc-number { font-size:1.25rem; }
+.document-template-minimal .doc-status { background:transparent; border:0; padding:0; }
+.document-template-minimal .doc-info-grid { grid-template-columns:1fr 1fr; border-bottom:1px solid #d0d5dd; padding-bottom:1.4rem; }
+.document-template-minimal .doc-bill-card,.document-template-minimal .doc-meta-card,.document-template-minimal .doc-totals,.document-template-minimal .doc-soft-card,.document-template-minimal .doc-payment-card,.document-template-minimal .doc-table-wrap,.document-template-minimal .doc-logo { border:0; border-radius:0; background:white; box-shadow:none; }
+.document-template-minimal .doc-bill-card,.document-template-minimal .doc-meta-card { padding-left:0 !important; padding-right:0 !important; }
+.document-template-minimal .doc-table-head { background:white; color:#101828; border-top:1px solid #101828; border-bottom:1px solid #101828; }
+.document-template-minimal .doc-cell { border-bottom:1px solid #e4e7ec; }
+.document-template-minimal .doc-row-alt { background:white; }
+.document-template-minimal .doc-totals { border-top:2px solid #101828; padding-right:0 !important; }
+
+/* 5. Graphite Sidebar — strong vertical spine and magazine-style hierarchy. */
+.document-template-graphite { --doc-primary:#262b33; --doc-accent:#d4a84f; --doc-soft:#f5f5f2; --doc-border:#d7d7d2; --doc-muted:#676d76; border-left:14px solid #262b33; }
+.document-template-graphite .doc-accent-bar { display:none; }
+.document-template-graphite .doc-header { grid-template-columns:1fr; gap:1rem; border-bottom:3px solid #d4a84f; }
+.document-template-graphite .doc-title-block { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:1rem; text-align:left !important; }
+.document-template-graphite .doc-number { font-size:2rem; }
+.document-template-graphite .doc-info-grid { grid-template-columns:1.25fr .75fr; }
+.document-template-graphite .doc-bill-card { background:#262b33; color:white; }
+.document-template-graphite .doc-bill-card .doc-customer-name,.document-template-graphite .doc-bill-card .doc-section-label,.document-template-graphite .doc-bill-card .doc-muted { color:white; }
+.document-template-graphite .doc-table-head { background:#262b33; }
+.document-template-graphite .doc-totals { background:#f5f5f2; border:0; border-top:4px solid #d4a84f; border-radius:0; }
+.document-template-graphite .doc-grand-total { border-color:#262b33; }
+
+/* 6. Emerald Commerce — centered letterhead, clean commerce blocks. */
+.document-template-emerald { --doc-primary:#135b4c; --doc-accent:#c49a44; --doc-soft:#f3faf6; --doc-border:#cbded7; --doc-muted:#62756e; }
+.document-template-emerald .doc-accent-bar { height:7px; background:linear-gradient(90deg,#135b4c 0 50%,#c49a44 50%); }
+.document-template-emerald .doc-header { grid-template-columns:1fr; text-align:center; border-bottom:0; margin-bottom:1.4rem; }
+.document-template-emerald .doc-company { justify-content:center; text-align:center; }
+.document-template-emerald .doc-title-block { text-align:center !important; padding-top:1rem; border-top:1px solid #cbded7; }
+.document-template-emerald .doc-info-grid { grid-template-columns:1fr 1fr; }
+.document-template-emerald .doc-bill-card,.document-template-emerald .doc-meta-card { background:white; border-top:4px solid #135b4c; }
+.document-template-emerald .doc-table-head { background:#fff; color:#135b4c; border-top:2px solid #135b4c; border-bottom:2px solid #135b4c; }
+.document-template-emerald .doc-totals { background:#135b4c; color:white; border:0; }
+.document-template-emerald .doc-totals .doc-muted,.document-template-emerald .doc-totals .doc-grand-total,.document-template-emerald .doc-totals strong { color:white; }
+.document-template-emerald .doc-grand-total { border-color:rgb(255 255 255 / .45); }
+
+/* 7. Copper Letterhead — centered premium letterhead with framed document body. */
+.document-template-copper { --doc-primary:#623d2c; --doc-accent:#ad6a3d; --doc-soft:#fcf6ef; --doc-border:#dfc9b8; --doc-muted:#79685e; border:1px solid #c9a88f; }
+.document-template-copper .doc-accent-bar { height:12px; background:linear-gradient(90deg,#623d2c,#ad6a3d,#d6b188); }
+.document-template-copper .doc-header { grid-template-columns:1fr; text-align:center; border-bottom:1px double #ad6a3d; }
+.document-template-copper .doc-company { justify-content:center; text-align:center; }
+.document-template-copper .doc-company-name,.document-template-copper .doc-number,.document-template-copper .doc-customer-name,.document-template-copper .doc-grand-total { font-family:Georgia,"Times New Roman",serif; }
+.document-template-copper .doc-title-block { text-align:center !important; }
+.document-template-copper .doc-kicker { font-size:.9rem; letter-spacing:.32em; }
+.document-template-copper .doc-info-grid { grid-template-columns:1.15fr .85fr; }
+.document-template-copper .doc-bill-card,.document-template-copper .doc-meta-card { border-radius:0; background:#fffaf5; }
+.document-template-copper .doc-table-wrap { border-radius:0; border:1px solid #ad6a3d; }
+.document-template-copper .doc-table-head { background:#efe0d3; color:#623d2c; border-bottom:2px solid #ad6a3d; }
+.document-template-copper .doc-cell { border-bottom:1px solid #ead8ca; }
+.document-template-copper .doc-totals { border-radius:0; border:1px solid #ad6a3d; background:#fffaf5; }
+
+@media (max-width:639px) {
+  .doc-body { padding:1.25rem; }
+  .doc-header,.document-template-executive .doc-header,.document-template-minimal .doc-header,.document-template-graphite .doc-header { grid-template-columns:1fr; }
+  .doc-title-block,.document-template-executive .doc-title-block,.document-template-minimal .doc-title-block,.document-template-graphite .doc-title-block { text-align:left !important; display:block; }
+  .document-template-executive .doc-company { grid-column:1; grid-row:auto; justify-content:flex-start; text-align:left; }
+  .document-template-executive .doc-title-block { grid-column:1; grid-row:auto; }
+  .document-template-tech .doc-header { margin:-1.25rem -1.25rem 1.5rem; padding:1.5rem 1.25rem; }
+  .document-template-minimal .doc-info-grid,.document-template-emerald .doc-info-grid { grid-template-columns:1fr; }
+}
+
+@media print {
+  .document-template { min-height:277mm !important; border-radius:0 !important; box-shadow:none !important; }
+  .doc-body { padding:0 !important; }
+  .document-template-tech .doc-header { margin:0 0 7mm !important; padding:7mm !important; }
+  .document-template-executive .doc-title-block { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .doc-table-wrap { overflow:visible !important; }
+  .doc-table { min-width:0 !important; }
+}
+.doc-product,.doc-description { overflow-wrap:anywhere; word-break:break-word; }
+
+/* Template picker: mini-previews also communicate layout, not only color. */
+.template-choice {
+  --choice-primary:#10243e;
+  --choice-accent:#a94836;
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr);
+  align-items:center;
+  gap:.7rem;
+  min-height:64px;
+  border:1px solid var(--rule);
+  border-radius:.7rem;
+  background:white;
+  padding:.55rem .65rem;
+  color:var(--ink);
+  transition:border-color .15s,box-shadow .15s,transform .15s;
+}
+.template-choice:hover { border-color:#9ba9b9; transform:translateY(-1px); }
+.template-choice-active { border-color:var(--choice-primary); box-shadow:0 0 0 2px color-mix(in srgb,var(--choice-primary) 18%,transparent); }
+.template-choice-paper { position:relative; display:block; height:42px; overflow:hidden; border:1px solid #d9dde3; border-radius:4px; background:#fff; box-shadow:0 2px 5px rgb(15 23 42 / .08); }
+.template-choice-paper::before { content:""; position:absolute; background:var(--choice-primary); }
+.template-choice-paper::after { content:""; position:absolute; background:var(--choice-accent); opacity:.85; }
+.template-choice-paper span { position:absolute; height:2px; border-radius:99px; background:#d6dbe2; }
+.template-choice-classic { --choice-primary:#10243e; --choice-accent:#a94836; }
+.template-choice-classic .template-choice-paper::before { inset:0 0 auto; height:8px; }
+.template-choice-classic .template-choice-paper::after { left:6px; right:22px; top:14px; height:3px; }
+.template-choice-classic .template-choice-paper span:nth-child(1){ left:6px; right:6px; top:23px; }
+.template-choice-classic .template-choice-paper span:nth-child(2){ left:6px; right:13px; top:29px; }
+.template-choice-classic .template-choice-paper span:nth-child(3){ left:6px; right:26px; top:35px; }
+.template-choice-executive { --choice-primary:#172b4d; --choice-accent:#c34e3b; }
+.template-choice-executive .template-choice-paper::before { left:4px; top:4px; bottom:4px; width:20px; border-radius:2px; }
+.template-choice-executive .template-choice-paper::after { left:29px; right:5px; top:7px; height:4px; }
+.template-choice-executive .template-choice-paper span:nth-child(1){ left:29px; right:5px; top:17px; }
+.template-choice-executive .template-choice-paper span:nth-child(2){ left:29px; right:9px; top:25px; }
+.template-choice-executive .template-choice-paper span:nth-child(3){ left:29px; right:16px; top:33px; }
+.template-choice-tech { --choice-primary:#083b66; --choice-accent:#0b91d0; }
+.template-choice-tech .template-choice-paper::before { inset:0 0 auto; height:15px; }
+.template-choice-tech .template-choice-paper::after { left:0; right:0; top:15px; height:3px; }
+.template-choice-tech .template-choice-paper span:nth-child(1){ left:5px; right:28px; top:24px; }
+.template-choice-tech .template-choice-paper span:nth-child(2){ left:5px; right:5px; top:30px; }
+.template-choice-tech .template-choice-paper span:nth-child(3){ left:5px; right:14px; top:36px; }
+.template-choice-minimal { --choice-primary:#101828; --choice-accent:#101828; }
+.template-choice-minimal .template-choice-paper::before { left:5px; right:5px; top:8px; height:2px; }
+.template-choice-minimal .template-choice-paper::after { left:5px; right:28px; top:15px; height:2px; }
+.template-choice-minimal .template-choice-paper span:nth-child(1){ left:5px; right:5px; top:24px; }
+.template-choice-minimal .template-choice-paper span:nth-child(2){ left:5px; right:5px; top:30px; }
+.template-choice-minimal .template-choice-paper span:nth-child(3){ left:5px; right:5px; top:36px; }
+.template-choice-graphite { --choice-primary:#262b33; --choice-accent:#d4a84f; }
+.template-choice-graphite .template-choice-paper::before { left:0; top:0; bottom:0; width:7px; }
+.template-choice-graphite .template-choice-paper::after { left:12px; right:5px; top:8px; height:3px; }
+.template-choice-graphite .template-choice-paper span:nth-child(1){ left:12px; right:5px; top:19px; }
+.template-choice-graphite .template-choice-paper span:nth-child(2){ left:12px; right:12px; top:27px; }
+.template-choice-graphite .template-choice-paper span:nth-child(3){ left:12px; right:20px; top:35px; }
+.template-choice-emerald { --choice-primary:#135b4c; --choice-accent:#c49a44; }
+.template-choice-emerald .template-choice-paper::before { left:5px; right:5px; top:5px; height:6px; border-radius:2px; }
+.template-choice-emerald .template-choice-paper::after { left:5px; right:5px; bottom:5px; height:6px; }
+.template-choice-emerald .template-choice-paper span:nth-child(1){ left:14px; right:14px; top:17px; }
+.template-choice-emerald .template-choice-paper span:nth-child(2){ left:8px; right:8px; top:24px; }
+.template-choice-emerald .template-choice-paper span:nth-child(3){ left:14px; right:14px; top:31px; }
+.template-choice-copper { --choice-primary:#623d2c; --choice-accent:#ad6a3d; }
+.template-choice-copper .template-choice-paper::before { left:5px; right:5px; top:4px; height:4px; }
+.template-choice-copper .template-choice-paper::after { left:10px; right:10px; top:13px; height:2px; }
+.template-choice-copper .template-choice-paper span:nth-child(1){ left:15px; right:15px; top:21px; }
+.template-choice-copper .template-choice-paper span:nth-child(2){ left:5px; right:5px; top:29px; }
+.template-choice-copper .template-choice-paper span:nth-child(3){ left:5px; right:5px; top:36px; }
+
+/* JasimFlow v4.1 — A4-safe invoice/quotation table. No horizontal scrollbar. */
+.doc-table-wrap { width:100%; max-width:100%; overflow:visible; }
+.doc-table { width:100%; min-width:0 !important; table-layout:fixed; }
+.doc-table .doc-col-product { width:22%; }
+.doc-table .doc-col-description { width:28%; }
+.doc-table .doc-col-qty { width:8%; }
+.doc-table .doc-col-unit { width:8%; }
+.doc-table .doc-col-rate { width:16%; }
+.doc-table .doc-col-amount { width:18%; }
+.doc-table th,
+.doc-table td { min-width:0; overflow-wrap:anywhere; word-break:normal; }
+.doc-table .money { white-space:nowrap; font-size:.78rem; }
+.doc-table .doc-product { line-height:1.35; }
+.doc-table .doc-description { line-height:1.45; }
+
+@media (max-width: 760px) {
+  .doc-table { font-size:.72rem; }
+  .doc-table th,
+  .doc-table td { padding:.55rem .4rem !important; }
+  .doc-table .money { font-size:.69rem; }
+  .doc-table .doc-col-product { width:23%; }
+  .doc-table .doc-col-description { width:27%; }
+  .doc-table .doc-col-qty { width:8%; }
+  .doc-table .doc-col-unit { width:8%; }
+  .doc-table .doc-col-rate { width:16%; }
+  .doc-table .doc-col-amount { width:18%; }
+}
+
+@media print {
+  @page { size:A4 portrait; margin:10mm; }
+  .document-paper,
+  .document-template,
+  .print-sheet { width:190mm !important; max-width:190mm !important; min-width:0 !important; }
+  .doc-table-wrap { width:100% !important; max-width:100% !important; overflow:visible !important; }
+  .doc-table { width:100% !important; min-width:0 !important; table-layout:fixed !important; font-size:8.5pt !important; }
+  .doc-table th,
+  .doc-table td { padding:2.4mm 1.6mm !important; }
+  .doc-table .money { white-space:nowrap !important; font-size:8pt !important; }
+}
+
+
+/* JasimFlow v4.3 — document bottom footer + optional self-branding. */
+.document-template { display:flex; flex-direction:column; }
+.doc-body { flex:1; display:flex; flex-direction:column; width:100%; }
+.doc-bottom-footer {
+  margin-top:auto;
+  padding-top:1.25rem;
+  text-align:center;
+  color:var(--doc-muted);
+}
+.doc-thanks-message {
+  border-top:1px solid var(--doc-border);
+  padding-top:1rem;
+  font-size:.75rem;
+  line-height:1.4;
+}
+.doc-brand-credit {
+  margin-top:.35rem;
+  font-size:.62rem;
+  line-height:1.35;
+  letter-spacing:.025em;
+  opacity:.72;
+}
+@media print {
+  .document-template { min-height:277mm !important; display:flex !important; flex-direction:column !important; }
+  .doc-body { flex:1 !important; display:flex !important; flex-direction:column !important; min-height:277mm !important; }
+  .doc-bottom-footer { margin-top:auto !important; padding-top:4mm !important; }
+  .doc-thanks-message { padding-top:3mm !important; font-size:8pt !important; }
+  .doc-brand-credit { font-size:6.5pt !important; }
+}
+
+/* JasimFlow v4.4 — professional invoice authorization row. */
+.doc-authorization-row {
+  margin-top:2rem;
+  padding-top:1.15rem;
+  border-top:1px solid var(--doc-border);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(190px,230px);
+  gap:2rem;
+  align-items:end;
+}
+.doc-terms-panel {
+  min-width:0;
+  color:var(--doc-ink);
+}
+.doc-signature-panel {
+  min-height:92px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:stretch;
+  justify-self:end;
+  width:100%;
+  max-width:220px;
+  padding-top:1.25rem;
+}
+
+.doc-signature-image-wrap {
+  height:54px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  margin-bottom:.2rem;
+  overflow:hidden;
+}
+.doc-signature-image {
+  display:block;
+  max-width:155px;
+  max-height:52px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+}
+
+.doc-signature-line {
+  width:100%;
+  border-top:1.35px solid currentColor;
+  opacity:.72;
+}
+.doc-signature-label {
+  padding-top:.45rem;
+  text-align:center;
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.025em;
+  color:var(--doc-muted);
+}
+@media (max-width:640px) {
+  .doc-authorization-row { grid-template-columns:1fr; gap:1.5rem; }
+  .doc-signature-panel { justify-self:end; width:min(220px,75%); }
+}
+@media print {
+  .doc-authorization-row {
+    margin-top:6mm !important;
+    padding-top:4mm !important;
+    grid-template-columns:minmax(0,1fr) 55mm !important;
+    gap:8mm !important;
+    page-break-inside:avoid !important;
+    break-inside:avoid !important;
+  }
+  .doc-signature-panel { min-height:22mm !important; max-width:55mm !important; }
+  .doc-signature-image-wrap { height:13mm !important; margin-bottom:1mm !important; }
+  .doc-signature-image { max-width:42mm !important; max-height:12mm !important; }
+  .doc-signature-label { font-size:7.5pt !important; }
+}
+
+/* JASIMFLOW V4.6 THEME + LOGO PATCH START */
+/* === JASIMFLOW V4.6 THEME + LOGO PATCH START === */
+/*
+   This block intentionally overrides presentation only.
+   Tech Grid and Minimal Ledger are preserved except for the shared logo-fit improvement.
+*/
+
+/* -------------------------------------------------------------------------- */
+/* Shared logo treatment — remove the double thumbnail/card look.              */
+/* Keeps the original aspect ratio and gives horizontal logos room to breathe. */
+/* -------------------------------------------------------------------------- */
+.document-template .doc-logo {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 190px !important;
+  height: 68px !important;
+  max-height: 68px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  flex: 0 0 auto !important;
+}
+.document-template .doc-logo img {
+  display: block !important;
+  width: auto !important;
+  height: 100% !important;
+  max-width: 190px !important;
+  max-height: 68px !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  border-radius: 7px;
+}
+
+/* A small clean white plate only where the logo sits on a dark header. */
+.document-template-tech .doc-logo,
+.document-template-graphite .doc-logo {
+  height: 72px !important;
+  max-height: 72px !important;
+  padding: 3px !important;
+  background: rgba(255,255,255,.97) !important;
+  border-radius: 10px !important;
+}
+.document-template-tech .doc-logo img,
+.document-template-graphite .doc-logo img {
+  max-height: 66px !important;
+}
+
+/* Minimal remains deliberately bare. */
+.document-template-minimal .doc-logo {
+  height: 58px !important;
+  max-height: 58px !important;
+  border-radius: 0 !important;
+}
+.document-template-minimal .doc-logo img {
+  max-height: 58px !important;
+  border-radius: 0 !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 1. Jasim Classic — clean premium letterhead + joined customer/meta panel.   */
+/* -------------------------------------------------------------------------- */
+.document-template-classic {
+  --doc-primary:#10243e;
+  --doc-accent:#b24f3d;
+  --doc-soft:#f8fafc;
+  --doc-border:#d7dee8;
+  --doc-muted:#64748b;
+  border:1px solid #dbe1e8;
+  border-radius:14px;
+}
+.document-template-classic .doc-accent-bar {
+  height:4px;
+  background:linear-gradient(90deg,#10243e 0 84%,#b24f3d 84% 100%);
+}
+.document-template-classic .doc-header {
+  grid-template-columns:minmax(0,1fr) 215px;
+  align-items:center;
+  gap:2rem;
+  margin-bottom:1.6rem;
+  padding-bottom:1.25rem;
+  border-bottom:1px solid #d7dee8;
+}
+.document-template-classic .doc-title-block {
+  padding-left:1.25rem;
+  border-left:3px solid #b24f3d;
+}
+.document-template-classic .doc-kicker { letter-spacing:.22em; }
+.document-template-classic .doc-info-grid {
+  grid-template-columns:minmax(0,1fr) 285px;
+  gap:0;
+  overflow:hidden;
+  border:1px solid #d7dee8;
+  border-radius:12px;
+}
+.document-template-classic .doc-bill-card,
+.document-template-classic .doc-meta-card {
+  border:0;
+  border-radius:0;
+  background:#fff;
+}
+.document-template-classic .doc-bill-card { background:#f8fafc; }
+.document-template-classic .doc-meta-card { border-left:1px solid #d7dee8; }
+.document-template-classic .doc-table-wrap { border-radius:10px; }
+.document-template-classic .doc-table-head { background:#10243e; }
+.document-template-classic .doc-totals {
+  border:0;
+  border-top:3px solid #10243e;
+  border-radius:0 0 10px 10px;
+  background:#f8fafc;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. Executive Split — pale corporate letterhead + strong invoice identity.  */
+/* -------------------------------------------------------------------------- */
+.document-template-executive {
+  --doc-primary:#233b5d;
+  --doc-accent:#bf5b48;
+  --doc-soft:#f5f7fa;
+  --doc-border:#d8dee7;
+  --doc-muted:#687386;
+  border:0;
+  border-radius:12px;
+}
+.document-template-executive .doc-accent-bar { display:none; }
+.document-template-executive .doc-header {
+  grid-template-columns:minmax(0,1fr) 250px;
+  align-items:center;
+  margin:-2.5rem -2.5rem 1.7rem;
+  padding:2rem 2.5rem 1.7rem;
+  border:0;
+  border-bottom:7px solid #233b5d;
+  background:#f2f5f9;
+}
+.document-template-executive .doc-company {
+  grid-column:1;
+  grid-row:1;
+  justify-content:flex-start;
+  text-align:left;
+  padding:0;
+}
+.document-template-executive .doc-company .doc-logo { order:0; }
+.document-template-executive .doc-title-block {
+  grid-column:2;
+  grid-row:1;
+  padding:1rem 1.15rem;
+  border:1px solid #d8dee7;
+  border-radius:10px;
+  background:#fff;
+  color:#172033;
+  text-align:right !important;
+  box-shadow:0 8px 22px rgb(35 59 93 / .08);
+}
+.document-template-executive .doc-company-name { color:#233b5d; }
+.document-template-executive .doc-number { color:#233b5d; }
+.document-template-executive .doc-kicker { color:#bf5b48; }
+.document-template-executive .doc-status {
+  border-color:#d8dee7;
+  background:#f5f7fa;
+  color:#687386;
+}
+.document-template-executive .doc-info-grid {
+  grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);
+  gap:1rem;
+}
+.document-template-executive .doc-bill-card {
+  background:#fff;
+  border-left:5px solid #bf5b48;
+}
+.document-template-executive .doc-meta-card {
+  order:0;
+  background:#233b5d;
+  color:#fff;
+  border-color:#233b5d;
+}
+.document-template-executive .doc-meta-card .doc-muted,
+.document-template-executive .doc-meta-card .doc-total-accent { color:#fff; }
+.document-template-executive .doc-meta-card .doc-amount-due { border-color:rgb(255 255 255 / .25); }
+.document-template-executive .doc-table-head { background:#233b5d; }
+.document-template-executive .doc-totals {
+  border:1px solid #d8dee7;
+  border-right:5px solid #bf5b48;
+  background:#fff;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. Tech Grid — KEEP CURRENT LAYOUT. Logo fit above is the only adjustment.  */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* 4. Minimal Ledger — KEEP CURRENT LAYOUT. Shared logo fit only.              */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* 5. Graphite Sidebar — dark identity rail + bright working document body.    */
+/* -------------------------------------------------------------------------- */
+.document-template-graphite {
+  --doc-primary:#242a31;
+  --doc-accent:#d2aa5b;
+  --doc-soft:#f5f5f3;
+  --doc-border:#d7d9dc;
+  --doc-muted:#6c727a;
+  border:0;
+  border-radius:0;
+  border-left:0;
+  background:#fff;
+}
+.document-template-graphite .doc-accent-bar { display:none; }
+.document-template-graphite .doc-header {
+  grid-template-columns:minmax(235px,.72fr) minmax(0,1.28fr);
+  gap:0;
+  margin:-2.5rem -2.5rem 1.8rem;
+  padding:0;
+  border:0;
+  background:#fff;
+}
+.document-template-graphite .doc-company {
+  min-height:190px;
+  padding:1.75rem;
+  align-content:flex-start;
+  background:#242a31;
+  color:#fff;
+}
+.document-template-graphite .doc-company-name,
+.document-template-graphite .doc-company-details,
+.document-template-graphite .doc-tax { color:#fff; }
+.document-template-graphite .doc-title-block {
+  display:flex;
+  min-height:190px;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:.35rem;
+  padding:1.75rem 2.2rem;
+  border-bottom:5px solid #d2aa5b;
+  text-align:right !important;
+  background:#f5f5f3;
+}
+.document-template-graphite .doc-kicker { color:#9a7a37; }
+.document-template-graphite .doc-number { font-size:2.25rem; color:#242a31; }
+.document-template-graphite .doc-info-grid {
+  grid-template-columns:minmax(0,1fr) minmax(250px,.75fr);
+  gap:1rem;
+}
+.document-template-graphite .doc-bill-card {
+  background:#fff;
+  color:#172033;
+  border:1px solid #d7d9dc;
+  border-left:5px solid #242a31;
+}
+.document-template-graphite .doc-bill-card .doc-customer-name { color:#242a31; }
+.document-template-graphite .doc-bill-card .doc-section-label { color:#9a7a37; }
+.document-template-graphite .doc-bill-card .doc-muted { color:#6c727a; }
+.document-template-graphite .doc-meta-card { background:#f5f5f3; }
+.document-template-graphite .doc-table-head { background:#242a31; }
+.document-template-graphite .doc-totals {
+  border:0;
+  border-top:5px solid #d2aa5b;
+  border-radius:0;
+  background:#242a31;
+  color:#fff;
+}
+.document-template-graphite .doc-totals .doc-muted,
+.document-template-graphite .doc-totals strong,
+.document-template-graphite .doc-totals .doc-grand-total { color:#fff; }
+.document-template-graphite .doc-grand-total { border-color:rgb(255 255 255 / .35); }
+
+/* -------------------------------------------------------------------------- */
+/* 6. Emerald Commerce — compact commerce header + reversed information flow. */
+/* -------------------------------------------------------------------------- */
+.document-template-emerald {
+  --doc-primary:#155d50;
+  --doc-accent:#c6a15a;
+  --doc-soft:#f2f8f5;
+  --doc-border:#cddfd8;
+  --doc-muted:#64766f;
+  border:1px solid #cddfd8;
+  border-radius:16px;
+}
+.document-template-emerald .doc-accent-bar { display:none; }
+.document-template-emerald .doc-header {
+  grid-template-columns:minmax(0,1fr) 240px;
+  align-items:center;
+  gap:1.5rem;
+  margin-bottom:1.55rem;
+  padding-bottom:1.35rem;
+  border-bottom:1px solid #cddfd8;
+  text-align:left;
+}
+.document-template-emerald .doc-company {
+  justify-content:flex-start;
+  text-align:left;
+}
+.document-template-emerald .doc-title-block {
+  padding:1.15rem 1.25rem;
+  border:0;
+  border-radius:14px 14px 3px 14px;
+  background:#155d50;
+  color:#fff;
+  text-align:right !important;
+}
+.document-template-emerald .doc-title-block .doc-number,
+.document-template-emerald .doc-title-block .doc-kicker { color:#fff; }
+.document-template-emerald .doc-title-block .doc-status {
+  border-color:rgb(255 255 255 / .28);
+  background:rgb(255 255 255 / .10);
+  color:#fff;
+}
+.document-template-emerald .doc-info-grid {
+  grid-template-columns:minmax(250px,.8fr) minmax(0,1.2fr);
+  gap:1rem;
+}
+.document-template-emerald .doc-meta-card {
+  order:-1;
+  background:#f2f8f5;
+  border-top:0;
+  border-left:5px solid #c6a15a;
+}
+.document-template-emerald .doc-bill-card {
+  background:#fff;
+  border-top:0;
+}
+.document-template-emerald .doc-table-wrap { border-radius:4px; }
+.document-template-emerald .doc-table-head {
+  background:#155d50;
+  color:#fff;
+  border:0;
+}
+.document-template-emerald .doc-totals {
+  border:0;
+  border-radius:14px 3px 14px 14px;
+  background:#155d50;
+  color:#fff;
+}
+.document-template-emerald .doc-totals .doc-muted,
+.document-template-emerald .doc-totals strong,
+.document-template-emerald .doc-totals .doc-grand-total { color:#fff; }
+.document-template-emerald .doc-grand-total { border-color:rgb(255 255 255 / .35); }
+
+/* -------------------------------------------------------------------------- */
+/* 7. Copper Letterhead — formal framed stationery, no filled colour blocks.  */
+/* -------------------------------------------------------------------------- */
+.document-template-copper {
+  --doc-primary:#573a2c;
+  --doc-accent:#a56f49;
+  --doc-soft:#fdf8f2;
+  --doc-border:#ddc9b7;
+  --doc-muted:#75685f;
+  border:4px double #b99272;
+  border-radius:0;
+  background:#fffdf9;
+}
+.document-template-copper .doc-accent-bar { display:none; }
+.document-template-copper .doc-body { padding:2.25rem; }
+.document-template-copper .doc-header {
+  grid-template-columns:1fr;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  padding-bottom:1.25rem;
+  border-bottom:1px solid #b99272;
+  text-align:center;
+}
+.document-template-copper .doc-company {
+  justify-content:center;
+  text-align:center;
+}
+.document-template-copper .doc-logo {
+  margin-inline:auto;
+  height:62px !important;
+  max-height:62px !important;
+}
+.document-template-copper .doc-logo img {
+  max-height:62px !important;
+  object-position:center !important;
+}
+.document-template-copper .doc-title-block {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:1rem;
+  padding-top:.85rem;
+  border-top:1px solid #ddc9b7;
+  text-align:center !important;
+}
+.document-template-copper .doc-kicker { font-size:.78rem; color:#a56f49; }
+.document-template-copper .doc-number { margin-top:0 !important; font-size:1.7rem; }
+.document-template-copper .doc-status { margin-top:0 !important; }
+.document-template-copper .doc-info-grid {
+  grid-template-columns:1.15fr .85fr;
+  gap:0;
+  border-top:1px solid #ddc9b7;
+  border-bottom:1px solid #ddc9b7;
+}
+.document-template-copper .doc-bill-card,
+.document-template-copper .doc-meta-card {
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.document-template-copper .doc-meta-card { border-left:1px solid #ddc9b7; }
+.document-template-copper .doc-table-wrap {
+  border:1px solid #b99272;
+  border-radius:0;
+}
+.document-template-copper .doc-table-head {
+  background:transparent;
+  color:#573a2c;
+  border-top:1px solid #b99272;
+  border-bottom:2px solid #b99272;
+}
+.document-template-copper .doc-row-alt { background:#fdf8f2; }
+.document-template-copper .doc-totals {
+  border:0;
+  border-top:2px solid #573a2c;
+  border-bottom:1px solid #ddc9b7;
+  border-radius:0;
+  background:transparent;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Updated mini previews so the selector also feels structurally different.   */
+/* -------------------------------------------------------------------------- */
+.template-choice-classic .template-choice-paper::before { inset:0 0 auto; height:4px; }
+.template-choice-classic .template-choice-paper::after { left:auto; right:5px; top:8px; width:18px; height:12px; border-radius:2px; }
+
+.template-choice-executive .template-choice-paper::before { inset:0 0 auto; height:13px; background:#eef2f7; border-bottom:3px solid var(--choice-primary); }
+.template-choice-executive .template-choice-paper::after { left:auto; right:5px; top:4px; width:16px; height:7px; border-radius:2px; }
+
+.template-choice-graphite .template-choice-paper::before { left:0; top:0; bottom:0; width:20px; }
+.template-choice-graphite .template-choice-paper::after { left:20px; right:0; top:0; height:4px; }
+
+.template-choice-emerald .template-choice-paper::before { left:auto; right:4px; top:4px; width:19px; height:12px; border-radius:4px 4px 1px 4px; }
+.template-choice-emerald .template-choice-paper::after { left:5px; right:5px; bottom:5px; height:5px; border-radius:2px; }
+
+.template-choice-copper .template-choice-paper { border:3px double #b99272; }
+.template-choice-copper .template-choice-paper::before { left:8px; right:8px; top:6px; height:1px; }
+.template-choice-copper .template-choice-paper::after { left:15px; right:15px; top:12px; height:1px; }
+
+/* Mobile keeps every theme readable without changing Tech/Minimal identity. */
+@media (max-width:639px) {
+  .document-template .doc-logo {
+    height:56px !important;
+    max-height:56px !important;
+    max-width:150px !important;
+  }
+  .document-template .doc-logo img {
+    max-height:56px !important;
+    max-width:150px !important;
+  }
+  .document-template-classic .doc-header,
+  .document-template-executive .doc-header,
+  .document-template-graphite .doc-header,
+  .document-template-emerald .doc-header,
+  .document-template-copper .doc-header {
+    grid-template-columns:1fr !important;
+  }
+  .document-template-classic .doc-title-block,
+  .document-template-executive .doc-title-block,
+  .document-template-graphite .doc-title-block,
+  .document-template-emerald .doc-title-block,
+  .document-template-copper .doc-title-block {
+    grid-column:auto !important;
+    grid-row:auto !important;
+    text-align:left !important;
+  }
+  .document-template-executive .doc-company,
+  .document-template-graphite .doc-company,
+  .document-template-emerald .doc-company,
+  .document-template-copper .doc-company {
+    grid-column:auto !important;
+    grid-row:auto !important;
+    justify-content:flex-start !important;
+    text-align:left !important;
+  }
+  .document-template-executive .doc-header,
+  .document-template-graphite .doc-header {
+    margin:-1.25rem -1.25rem 1.4rem !important;
+  }
+  .document-template-graphite .doc-company,
+  .document-template-graphite .doc-title-block { min-height:auto; }
+  .document-template-classic .doc-info-grid,
+  .document-template-executive .doc-info-grid,
+  .document-template-graphite .doc-info-grid,
+  .document-template-emerald .doc-info-grid,
+  .document-template-copper .doc-info-grid {
+    grid-template-columns:1fr !important;
+  }
+  .document-template-classic .doc-meta-card,
+  .document-template-copper .doc-meta-card { border-left:0; border-top:1px solid var(--doc-border); }
+}
+
+/* A4 print-safe logo and theme corrections. */
+@media print {
+  .document-template .doc-logo {
+    height:18mm !important;
+    max-height:18mm !important;
+    max-width:48mm !important;
+  }
+  .document-template .doc-logo img {
+    max-height:18mm !important;
+    max-width:48mm !important;
+  }
+  .document-template-executive .doc-header,
+  .document-template-graphite .doc-header {
+    margin:0 0 7mm !important;
+  }
+  .document-template-executive .doc-header { padding:6mm !important; }
+  .document-template-graphite .doc-header { padding:0 !important; }
+  .document-template-copper { border:1.2mm double #b99272 !important; }
+}
+/* === JASIMFLOW V4.6 THEME + LOGO PATCH END === */
+/* JASIMFLOW V4.6 THEME + LOGO PATCH END */
